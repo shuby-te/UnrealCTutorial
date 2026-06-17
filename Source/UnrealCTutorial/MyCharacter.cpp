@@ -20,14 +20,17 @@ AMyCharacter::AMyCharacter()
 	SpringArm->SetupAttachment(RootComponent);
 	Camera->SetupAttachment(SpringArm);
 
-	//SpringArm의 Target Arm Length를 400.f으로 설정 
 	SpringArm->TargetArmLength = 400.f;
-
-	//SpringArm의 위치와 회전을 각각 z에 100.0, Pitch에 -25.0
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0, 0.0, 100.0), FRotator(-25.0, 0.0, 0.0));
 
 
 
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AI(TEXT("/Script/Engine.AnimBlueprint'/Game/Animation/ABP_MyCharacter.ABP_MyCharacter_C'"));
+
+	if (AI.Succeeded())
+	{
+		GetMesh()->SetAnimClass(AI.Class);
+	}
 
 }
 
@@ -47,5 +50,19 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+
+	PlayerInputComponent->BindAxis(TEXT("MoveForwardBackward"), this, &AMyCharacter::KeyUpDown);
+	PlayerInputComponent->BindAxis(TEXT("MoveLeftRight"), this, &AMyCharacter::KeyLeftRight);
+
+}
+
+void AMyCharacter::KeyUpDown(float value)
+{
+	AddMovementInput(GetActorForwardVector(), value, false);
+}
+
+void AMyCharacter::KeyLeftRight(float value)
+{
+	AddMovementInput(GetActorRightVector(), value, false);
 }
 
