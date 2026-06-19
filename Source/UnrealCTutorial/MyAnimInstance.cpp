@@ -63,6 +63,8 @@ void UMyAnimInstance::PlayAttackMontage()
 		if (!Montage_IsPlaying(AttackMontage))
 		{
 			Montage_Play(AttackMontage);
+
+			//Player에 있는 PlayerAttack() 함수를 여기서 실행
 		}
 	}
 }
