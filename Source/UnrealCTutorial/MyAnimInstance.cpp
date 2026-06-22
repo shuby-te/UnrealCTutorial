@@ -2,8 +2,10 @@
 
 
 #include "MyAnimInstance.h"
-#include "GameFramework/Character.h"
+//#include "GameFramework/Character.h"
+#include "MyCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
 
 UMyAnimInstance::UMyAnimInstance()
 {
@@ -19,11 +21,11 @@ void UMyAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 	
-	auto Pawn = TryGetPawnOwner();
+	auto Pawn = TryGetPawnOwner();					
 
 	if (IsValid(Pawn))
 	{
-		Character = Cast<ACharacter>(Pawn);
+		Character = Cast<AMyCharacter>(Pawn);
 
 		if (IsValid(Character))
 		{
@@ -64,7 +66,7 @@ void UMyAnimInstance::PlayAttackMontage()
 		{
 			Montage_Play(AttackMontage);
 
-			//Player에 있는 PlayerAttack() 함수를 여기서 실행
+			Character->PlayerAttack();
 		}
 	}
 }

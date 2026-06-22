@@ -41,5 +41,5 @@ public:
 	void KeyAttack();
 
 public:
-	void PlayerAttack(); // capsule collider를 발생 시켜서 충돌을
+	void PlayerAttack(); 
 };
