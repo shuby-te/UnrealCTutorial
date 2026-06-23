@@ -2,6 +2,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "MyAnimInstance.h"
+#include "Kismet/GameplayStatics.h"	// Ãß°¡
 
 AMyCharacter::AMyCharacter()
 {
@@ -140,7 +141,10 @@ void AMyCharacter::PlayerAttack()
 
 	if (Result && HitResult.GetActor())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit : %s"), *HitResult.GetActor()->GetName());
+		//AActor* Target = HitResult.GetActor();
+		auto Target = HitResult.GetActor();
+
+		UGameplayStatics::ApplyDamage(Target, 10.f, GetController(), this, NULL);
 	}
 
 }
