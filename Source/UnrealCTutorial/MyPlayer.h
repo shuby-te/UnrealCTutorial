@@ -11,6 +11,11 @@ class UNREALCTUTORIAL_API AMyPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(VisibleAnywhere)
+	class USpringArmComponent* SpringArm;
+	UPROPERTY(VisibleAnywhere)
+	class UCameraComponent* Camera;
 public:
 	// Sets default values for this character's properties
 	AMyPlayer();
