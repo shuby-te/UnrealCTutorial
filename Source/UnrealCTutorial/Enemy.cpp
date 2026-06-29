@@ -6,26 +6,7 @@
 #include "EnemyAnimInstance.h"
 #include "Components/WidgetComponent.h"
 #include "HpUserWidget.h"
-#include "Components/ProgressBar.h"
-
-void AEnemy::SetHp(float NewHp)
-{
-	Hp = NewHp;
-	if (Hp <= 0)
-	{
-		Hp = 0;
-	}
-}
-
-float AEnemy::GetHpRatio() const
-{
-	if (MaxHp <= 0.f || Hp <= 0.f)
-	{
-		return 0.f;
-	}
-
-	return Hp / MaxHp;
-}
+#include "HPActorComponent.h"
 
 AEnemy::AEnemy()
 {
@@ -49,7 +30,7 @@ AEnemy::AEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 
 	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
-	HpBar->SetupAttachment(GetRootComponent());
+	HpBar->SetupAttachment(GetMesh());	 //GetRootComponent() -> GetMesh()
 	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 130.f));
 	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
 	HpBar->SetDrawSize(FVector2D(200.f, 20.f));
@@ -60,8 +41,8 @@ AEnemy::AEnemy()
 		HpBar->SetWidgetClass(UW.Class);
 	}
 
-	MaxHp = 100.f;
 
+	HpActorComponent = CreateDefaultSubobject<UHPActorComponent>(TEXT("HP Actor Component"));
 }
 
 void AEnemy::BeginPlay()
@@ -71,12 +52,10 @@ void AEnemy::BeginPlay()
 	EnemyAnimInstance->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
 	
 
-	Hp = MaxHp;
-
 	auto HpWidget = Cast<UHpUserWidget>(HpBar->GetUserWidgetObject());
 	if (HpWidget)
 	{
-		HpWidget->HP_ProgressBar->SetPercent(GetHpRatio());
+		HpWidget->BindHp(HpActorComponent);
 	}
 
 }
@@ -96,16 +75,7 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	
-	float NewHp = Hp - Damage;
-
-	SetHp(NewHp);
-
-	auto HpWidget = Cast<UHpUserWidget>(HpBar->GetUserWidgetObject());
-	if (HpWidget)
-	{
-		HpWidget->HP_ProgressBar->SetPercent(GetHpRatio());
-	}	   
-	
+	HpActorComponent->OnDamaged(Damage);
 
 	return Damage;
 }
