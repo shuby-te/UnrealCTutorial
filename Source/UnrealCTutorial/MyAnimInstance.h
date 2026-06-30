@@ -29,8 +29,9 @@ private:
 	bool IsFalling;
 
 public:
+	//AMyPlayer ·Î ±³Ã¼
 	UPROPERTY(VisibleAnywhere)
-	class AMyCharacter* Character;
+	class AMyPlayer* Character;
 	UPROPERTY(VisibleAnywhere)
 	class UCharacterMovementComponent* CharacterMovement;
 	UPROPERTY(VisibleAnywhere)

@@ -2,14 +2,14 @@
 
 
 #include "MyAnimInstance.h"
-//#include "GameFramework/Character.h"
-#include "MyCharacter.h"
+#include "MyPlayer.h"  //교체
 #include "GameFramework/CharacterMovementComponent.h"
 
 
 UMyAnimInstance::UMyAnimInstance()
 {
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Game/ParagonGreystone/Characters/Heroes/Greystone/Animations/Attack_PrimaryB_Montage.Attack_PrimaryB_Montage"));
+	//경로 수정
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Game/ParagonSparrow/Characters/Heroes/Sparrow/Animations/Primary_Fire_Med_Montage.Primary_Fire_Med_Montage"));
 
 	if (AM.Succeeded())
 	{
@@ -25,7 +25,8 @@ void UMyAnimInstance::NativeBeginPlay()
 
 	if (IsValid(Pawn))
 	{
-		Character = Cast<AMyCharacter>(Pawn);
+		//AMyPlayer 교체
+		Character = Cast<AMyPlayer>(Pawn);
 
 		if (IsValid(Character))
 		{
