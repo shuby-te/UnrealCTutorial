@@ -2,13 +2,13 @@
 
 
 #include "MyAnimInstance.h"
-#include "MyPlayer.h"  //교체
+#include "MyPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h" //추가
 
 
 UMyAnimInstance::UMyAnimInstance()
 {
-	//경로 수정
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> AM(TEXT("/Game/ParagonSparrow/Characters/Heroes/Sparrow/Animations/Primary_Fire_Med_Montage.Primary_Fire_Med_Montage"));
 
 	if (AM.Succeeded())
@@ -25,7 +25,6 @@ void UMyAnimInstance::NativeBeginPlay()
 
 	if (IsValid(Pawn))
 	{
-		//AMyPlayer 교체
 		Character = Cast<AMyPlayer>(Pawn);
 
 		if (IsValid(Character))
@@ -56,6 +55,17 @@ void UMyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		ShouldMove = GroundSpeed > 0.1 && Acceleration != FVector::Zero();
 
 		IsFalling = CharacterMovement->IsFalling();
+
+		AimRotation = Character->GetBaseAimRotation();
+
+		FRotator RotFromX = UKismetMathLibrary::MakeRotFromX(Velocity);
+
+		FRotator DeltaRotation = RotFromX - AimRotation;
+		DeltaRotation.Normalize();
+
+		YawOffset = DeltaRotation.Yaw;
+
+		UE_LOG(LogTemp, Log, TEXT("Yaw Offset : %f"), YawOffset);
 	}
 }
 

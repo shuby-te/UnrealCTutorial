@@ -27,9 +27,14 @@ private:
 	float GroundSpeed;
 	UPROPERTY(Category = "Character Movement", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	bool IsFalling;
+private:
+	//추가
+	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	float YawOffset;
+	UPROPERTY(Category = "Aim", EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FRotator AimRotation;
 
 public:
-	//AMyPlayer 로 교체
 	UPROPERTY(VisibleAnywhere)
 	class AMyPlayer* Character;
 	UPROPERTY(VisibleAnywhere)

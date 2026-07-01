@@ -1,12 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MyPlayer.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"	
 #include "EnhancedInputSubsystems.h"
 #include "MyAnimInstance.h"
+#include "Arrow.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -31,6 +29,7 @@ AMyPlayer::AMyPlayer()
 	SpringArm->TargetArmLength = 400.f;
 	SpringArm->SetRelativeLocationAndRotation(FVector(0.0, 0.0, 100.0), FRotator(-25.0, 0.0, 0.0));
 	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->SocketOffset = FVector(0.0, 120.0, 0.0);	//위치 이동
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AI(TEXT("/Script/Engine.AnimBlueprint'/Game/Animation/ABP_Player.ABP_Player_C'"));
 
@@ -117,11 +116,20 @@ void AMyPlayer::Fire(const FInputActionValue& Value)
 	{
 		AnimInstance->PlayAttackMontage();
 
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		FVector SocketLocation = SocketTransform.GetLocation();
+		FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
+
+		FActorSpawnParameters Params;
+		Params.Owner = this;
+
+		auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, Params);
+
 	}
 }
 
 
 void AMyPlayer::PlayerAttack()
 {
-	UE_LOG(LogTemp, Log, TEXT("PlayerAttack"));
+	//UE_LOG(LogTemp, Log, TEXT("PlayerAttack"));
 }
