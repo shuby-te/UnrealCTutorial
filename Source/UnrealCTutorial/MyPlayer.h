@@ -23,6 +23,18 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UMyAnimInstance* AnimInstance;
+	UPROPERTY(VisibleAnywhere)
+	class UWidgetComponent* HpBar;
+	UPROPERTY(VisibleAnywhere)
+	class UHPActorComponent* HpActorComponent;
+
+private:
+	//소켓의 위치값과 회전값을 담기 위해
+	UPROPERTY(VisibleAnywhere)
+	FVector SocketLocation;
+	UPROPERTY(VisibleAnywhere)
+	FRotator SocketRotation;
+
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = true))
 	UInputMappingContext* DefaultMappingContext;
@@ -38,14 +50,9 @@ public:
 	AMyPlayer();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 public:

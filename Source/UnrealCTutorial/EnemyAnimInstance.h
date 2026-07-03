@@ -20,6 +20,8 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UAnimMontage* AttackMontage;		
 	UPROPERTY(VisibleAnywhere)
+	class AEnemy* Enemy;
+	UPROPERTY(VisibleAnywhere)
 	class UCharacterMovementComponent* CharacterMovement;
 public:
 	UEnemyAnimInstance();
@@ -28,5 +30,8 @@ public:
 public:
 	virtual void NativeBeginPlay() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+public:
+	UFUNCTION()
+	void AnimNotify_Hit();
 	
 };

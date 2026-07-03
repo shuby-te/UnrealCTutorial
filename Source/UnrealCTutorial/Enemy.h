@@ -16,7 +16,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UWidgetComponent* HpBar;
 	UPROPERTY(VisibleAnywhere)
-	class UHPActorComponent* HpActorComponent; // 이걸로 변경
+	class UHPActorComponent* HpActorComponent; 
 private:
 	bool IsAttacking = false;
 public:
@@ -35,6 +35,7 @@ public:
 
 public:
 	void EnemyAttack();
+	void EnemyHit();
 public:
 	UFUNCTION()
 	void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterupted);

@@ -7,6 +7,7 @@
 #include "Components/WidgetComponent.h"
 #include "HpUserWidget.h"
 #include "HPActorComponent.h"
+#include "Kismet/GameplayStatics.h"	// Ãß°¡
 
 AEnemy::AEnemy()
 {
@@ -30,7 +31,7 @@ AEnemy::AEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 
 	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
-	HpBar->SetupAttachment(GetMesh());	 //GetRootComponent() -> GetMesh()
+	HpBar->SetupAttachment(GetMesh());	
 	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 130.f));
 	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
 	HpBar->SetDrawSize(FVector2D(200.f, 20.f));
@@ -91,6 +92,60 @@ void AEnemy::EnemyAttack()
 
 		}
 	}
+}
+
+void AEnemy::EnemyHit()
+{
+	FHitResult HitResult;
+	FCollisionQueryParams Params(NAME_None, false, this);
+
+	float AttackRange = 200.f;
+	float AttackRadius = 40.f;
+	float AttackHalfHeight = 90.f;
+	FVector StartPos = GetActorLocation();
+	FVector FwdVector = GetActorForwardVector() * AttackRange;
+
+	FVector EndPos = StartPos + FwdVector;
+
+	bool Result = GetWorld()->SweepSingleByChannel
+	(
+		OUT HitResult,
+		StartPos,
+		EndPos,
+		FQuat::Identity,
+		ECC_GameTraceChannel1,
+		FCollisionShape::MakeCapsule(AttackRadius, AttackHalfHeight),
+		Params
+	);
+
+	FQuat AttackRotation = FRotationMatrix::MakeFromZ(EndPos).ToQuat();
+	FColor DebugColor = Result ? FColor::Green : FColor::Red;
+
+	FVector Center = StartPos + FwdVector * 0.5f;
+
+	DrawDebugCapsule
+	(
+		GetWorld(),
+		Center,
+		AttackHalfHeight,
+		AttackRadius,
+		AttackRotation,
+		DebugColor,
+		false,
+		2.0f
+
+	);
+
+	if (Result && HitResult.GetActor())
+	{
+		//AActor* Target = HitResult.GetActor();
+		auto Target = HitResult.GetActor();
+
+		UGameplayStatics::ApplyDamage(Target, 10.f, GetController(), this, NULL);
+	}
+
+
+
 }
 
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterupted)

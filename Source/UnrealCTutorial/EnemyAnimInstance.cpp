@@ -4,6 +4,7 @@
 #include "EnemyAnimInstance.h"
 #include "GameFramework/Character.h"   
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Enemy.h"
 
 UEnemyAnimInstance::UEnemyAnimInstance()
 {
@@ -33,10 +34,10 @@ void UEnemyAnimInstance::NativeBeginPlay()
 
 	if (IsValid(Pawn))
 	{
-		ACharacter* MyCharacter = Cast<ACharacter>(Pawn);
-		if (MyCharacter)
+		Enemy = Cast<AEnemy>(Pawn);
+		if (Enemy)
 		{
-			CharacterMovement = MyCharacter->GetCharacterMovement();
+			CharacterMovement = Enemy->GetCharacterMovement();
 		}
 	}
 }
@@ -51,5 +52,10 @@ void UEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		float GroundSpeed = Velocity.Size2D();
 		ShouldMove = GroundSpeed >= 1.0;
 	}
+}
+
+void UEnemyAnimInstance::AnimNotify_Hit()
+{
+	Enemy->EnemyHit();
 }
 

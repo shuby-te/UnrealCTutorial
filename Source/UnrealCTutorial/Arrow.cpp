@@ -64,5 +64,11 @@ void AArrow::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherAc
 	CollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitParticle, CollisionBox->GetComponentLocation(), FRotator::ZeroRotator, true);
+
+	UGameplayStatics::ApplyDamage(OtherActor, 10.f, ProjectileMovement->GetOwner()->GetInstigatorController(), ProjectileMovement->GetOwner(), NULL);
+
+	FTimerHandle TimerHandler;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandler, [&]() {Destroy(); }, 3.f, false);
+
 }
 

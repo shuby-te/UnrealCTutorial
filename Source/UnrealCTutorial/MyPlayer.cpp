@@ -5,6 +5,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "MyAnimInstance.h"
 #include "Arrow.h"
+#include "Kismet/GameplayStatics.h" 
+#include "Components/WidgetComponent.h"
+#include "HpUserWidget.h"
+#include "HPActorComponent.h"
 
 AMyPlayer::AMyPlayer()
 {
@@ -38,6 +42,21 @@ AMyPlayer::AMyPlayer()
 		GetMesh()->SetAnimClass(AI.Class);
 	}
 
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 130.f));
+	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+	HpBar->SetDrawSize(FVector2D(200.f, 20.f));
+
+	static ConstructorHelpers::FClassFinder<UHpUserWidget> UW(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
+	if (UW.Succeeded())
+	{
+		HpBar->SetWidgetClass(UW.Class);
+	}
+
+
+	HpActorComponent = CreateDefaultSubobject<UHPActorComponent>(TEXT("HP Actor Component"));
+
 }
 
 void AMyPlayer::BeginPlay()
@@ -70,7 +89,7 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMyPlayer::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyPlayer::Look);
-		//Started
+
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AMyPlayer::Fire);
 
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
@@ -116,18 +135,52 @@ void AMyPlayer::Fire(const FInputActionValue& Value)
 	if (IsValid(AnimInstance))
 	{
 		AnimInstance->PlayAttackMontage();
+
+		float AttackRange = 100000.f;
+
+		FHitResult HitResut;
+
+		APlayerCameraManager* CameraManager = UGameplayStatics::GetPlayerCameraManager(this, 0);
+
+		FVector AimLocation = CameraManager->GetCameraLocation();
+		FVector TargetLocation = AimLocation + CameraManager->GetActorForwardVector() * AttackRange;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(this);
+
+		bool Result = GetWorld()->LineTraceSingleByChannel
+		(
+			OUT HitResut,
+			AimLocation,
+			TargetLocation,
+			ECollisionChannel::ECC_Visibility,
+			Params
+		);
+
+		if (Result)
+		{
+			TargetLocation = HitResut.ImpactPoint;
+		}
+
+		FColor Color = Result ? FColor::Green : FColor::Red;
+
+		DrawDebugLine(GetWorld(), AimLocation, TargetLocation, Color, true);
+
+		FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
+		SocketLocation = SocketTransform.GetLocation();
+		FVector DeltaVector = TargetLocation - SocketLocation;
+		SocketRotation = FRotationMatrix::MakeFromX(DeltaVector).Rotator();
 	}
+
+	
 }
 
 
 void AMyPlayer::PlayerAttack()
 {
-	FTransform SocketTransform = GetMesh()->GetSocketTransform(FName("ArrowSocket"));
-	FVector SocketLocation = SocketTransform.GetLocation();
-	FRotator SocketRotation = SocketTransform.GetRotation().Rotator();
 
 	FActorSpawnParameters Params;
 	Params.Owner = this;
+	Params.Instigator = this;
 
 	auto MyArrow = GetWorld()->SpawnActor<AArrow>(SocketLocation, SocketRotation, Params);
 }

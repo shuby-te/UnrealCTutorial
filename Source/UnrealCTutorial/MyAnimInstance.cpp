@@ -76,8 +76,7 @@ void UMyAnimInstance::PlayAttackMontage()
 		if (!Montage_IsPlaying(AttackMontage))
 		{
 			Montage_Play(AttackMontage);
-
-			Character->PlayerAttack();
+		
 		}
 	}
 }
