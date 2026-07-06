@@ -7,7 +7,8 @@
 #include "Components/WidgetComponent.h"
 #include "HpUserWidget.h"
 #include "HPActorComponent.h"
-#include "Kismet/GameplayStatics.h"	// 추가
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h" // CharacterMovement 사용할려면
 
 AEnemy::AEnemy()
 {
@@ -31,10 +32,10 @@ AEnemy::AEnemy()
 	AIControllerClass = AEnemyAIController::StaticClass();
 
 	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
-	HpBar->SetupAttachment(GetMesh());	
+	HpBar->SetupAttachment(RootComponent);
 	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 130.f));
 	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-	HpBar->SetDrawSize(FVector2D(200.f, 20.f));
+	HpBar->SetDrawSize(FVector2D(400.f, 20.f));
 
 	static ConstructorHelpers::FClassFinder<UHpUserWidget> UW(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
 	if (UW.Succeeded())
@@ -49,6 +50,10 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	bUseControllerRotationYaw = true;
+
 	EnemyAnimInstance = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
 	EnemyAnimInstance->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
 	
@@ -102,23 +107,31 @@ void AEnemy::EnemyHit()
 	float AttackRange = 200.f;
 	float AttackRadius = 40.f;
 	float AttackHalfHeight = 90.f;
+
 	FVector StartPos = GetActorLocation();
-	FVector FwdVector = GetActorForwardVector() * AttackRange;
+	FVector Forward = GetActorForwardVector();
+	FVector FwdVector = Forward * AttackRange;
 
 	FVector EndPos = StartPos + FwdVector;
+
+	//캡슐을 캐릭터가 바라보는 방향으로 90도 회전.
+	FQuat SweepRotation = FRotationMatrix::MakeFromZ(Forward).ToQuat();
+
+
 
 	bool Result = GetWorld()->SweepSingleByChannel
 	(
 		OUT HitResult,
 		StartPos,
 		EndPos,
-		FQuat::Identity,
+		SweepRotation,   //FQuat::Identity -> SweepRotation 실제 누운값으로 회전
 		ECC_GameTraceChannel1,
 		FCollisionShape::MakeCapsule(AttackRadius, AttackHalfHeight),
 		Params
 	);
 
-	FQuat AttackRotation = FRotationMatrix::MakeFromZ(EndPos).ToQuat();
+	//디버그용 회전은 실제 회전값
+	FQuat DebugRotation = SweepRotation;
 	FColor DebugColor = Result ? FColor::Green : FColor::Red;
 
 	FVector Center = StartPos + FwdVector * 0.5f;
@@ -129,7 +142,7 @@ void AEnemy::EnemyHit()
 		Center,
 		AttackHalfHeight,
 		AttackRadius,
-		AttackRotation,
+		DebugRotation,
 		DebugColor,
 		false,
 		2.0f

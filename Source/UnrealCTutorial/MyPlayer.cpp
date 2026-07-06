@@ -43,10 +43,10 @@ AMyPlayer::AMyPlayer()
 	}
 
 	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HpBar"));
-	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetupAttachment(RootComponent);
 	HpBar->SetRelativeLocation(FVector(0.f, 0.f, 130.f));
 	HpBar->SetWidgetSpace(EWidgetSpace::Screen);
-	HpBar->SetDrawSize(FVector2D(200.f, 20.f));
+	HpBar->SetDrawSize(FVector2D(400.f, 20.f));
 
 	static ConstructorHelpers::FClassFinder<UHpUserWidget> UW(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/UI/WBP_HpBar.WBP_HpBar_C'"));
 	if (UW.Succeeded())
@@ -64,6 +64,12 @@ void AMyPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	AnimInstance = Cast<UMyAnimInstance>(GetMesh()->GetAnimInstance());
+
+	auto HpWidget = Cast<UHpUserWidget>(HpBar->GetUserWidgetObject());
+	if (HpWidget)
+	{
+		HpWidget->BindHp(HpActorComponent);
+	}
 	
 }
 
@@ -98,6 +104,13 @@ void AMyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 	
 
+}
+
+float AMyPlayer::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	HpActorComponent->OnDamaged(Damage);
+
+	return Damage;
 }
 
 void AMyPlayer::Move(const FInputActionValue& Value)

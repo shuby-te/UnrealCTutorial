@@ -23,5 +23,6 @@ public:
 public:													
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
+	virtual void Tick(float DeltaTime) override;
 	
 };
